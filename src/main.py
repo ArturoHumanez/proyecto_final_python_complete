@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,7 +39,8 @@ app.include_router(orders_router)
 
 @app.on_event("startup")
 def on_startup():
-    seed_database()
+    if os.getenv("TESTING") != "1":
+        seed_database()
 
 
 @app.get("/")

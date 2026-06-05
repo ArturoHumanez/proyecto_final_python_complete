@@ -81,3 +81,16 @@ class ListOrdersUseCase:
             if status:
                 return self._uow.orders.find_by_status(status)
             return self._uow.orders.find_all()
+
+
+class DeleteOrderUseCase:
+    def __init__(self, uow: UnitOfWork) -> None:
+        self._uow = uow
+
+    def execute(self, order_id: int) -> None:
+        with self._uow:
+            order = self._uow.orders.find_by_id(order_id)
+            if not order:
+                raise OrderNotFoundError(order_id)
+            self._uow.orders.delete(order_id)
+            self._uow.commit()

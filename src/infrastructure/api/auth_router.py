@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from src.infrastructure.adapters.database import SessionFactory
+from src.infrastructure.adapters.database import get_session
 from src.infrastructure.adapters.sql_models import UserModel
 from src.infrastructure.api.auth import (
     LoginRequest,
@@ -16,8 +17,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/register", response_model=TokenResponse, status_code=201)
-def register(data: RegisterRequest):
-    session = SessionFactory()
+def register(data: RegisterRequest, session: Session = Depends(get_session)):
     try:
         existing = session.scalars(
             select(UserModel).where(UserModel.email == data.email)
@@ -43,8 +43,7 @@ def register(data: RegisterRequest):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(data: LoginRequest):
-    session = SessionFactory()
+def login(data: LoginRequest, session: Session = Depends(get_session)):
     try:
         user = session.scalars(
             select(UserModel).where(UserModel.email == data.email)

@@ -6,6 +6,7 @@ from src.application.use_cases import (
     CancelOrderUseCase,
     CompleteOrderUseCase,
     CreateOrderUseCase,
+    DeleteOrderUseCase,
     GetOrderUseCase,
     ListOrdersUseCase,
 )
@@ -37,3 +38,7 @@ def get_get_order_uc() -> GetOrderUseCase:
 
 def get_list_orders_uc() -> ListOrdersUseCase:
     return ListOrdersUseCase(uow=_uow())
+
+
+def get_delete_order_uc() -> DeleteOrderUseCase:
+    return DeleteOrderUseCase(uow=_uow())

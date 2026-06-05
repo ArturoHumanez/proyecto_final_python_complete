@@ -10,6 +10,7 @@ from src.application.use_cases import (
     CancelOrderUseCase,
     CompleteOrderUseCase,
     CreateOrderUseCase,
+    DeleteOrderUseCase,
     GetOrderUseCase,
     ListOrdersUseCase,
 )
@@ -20,6 +21,7 @@ from src.infrastructure.api.dependencies import (
     get_cancel_order_uc,
     get_complete_order_uc,
     get_create_order_uc,
+    get_delete_order_uc,
     get_get_order_uc,
     get_list_orders_uc,
 )
@@ -102,16 +104,10 @@ def update_order_status(
 @router.delete("/{order_id}", status_code=204)
 def delete_order(
     order_id: int,
-    uc: GetOrderUseCase = Depends(get_get_order_uc),
+    uc: DeleteOrderUseCase = Depends(get_delete_order_uc),
     user: dict = Depends(get_current_user),
 ):
     try:
         uc.execute(order_id)
     except OrderNotFoundError:
         raise HTTPException(status_code=404, detail="Orden no encontrada")
-
-    from src.infrastructure.adapters.sql_uow import SqlUnitOfWork
-
-    with SqlUnitOfWork() as uow:
-        uow.orders.delete(order_id)
-        uow.commit()
