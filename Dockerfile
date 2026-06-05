@@ -20,6 +20,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY alembic/ ./alembic/
 COPY alembic.ini .
+COPY .env.docker .env
+
+
+RUN mkdir -p /app/data && chown appuser:appuser /app/data
 
 USER appuser
 

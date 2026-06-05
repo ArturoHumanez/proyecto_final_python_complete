@@ -9,15 +9,15 @@ from src.infrastructure.adapters.sql_models import OrderItemModel, OrderModel, U
 logger = logging.getLogger(__name__)
 
 SEED_USERS: list[dict[str, str]] = [
-    {"name": "Juan Pérez", "email": "juan@example.com"},
-    {"name": "María García", "email": "maria@example.com"},
-    {"name": "Ana López", "email": "ana@example.com"},
-    {"name": "Pedro Ramírez", "email": "pedro@example.com"},
+    {"name": "Juan Perez", "email": "juan@example.com"},
+    {"name": "Maria Garcia", "email": "maria@example.com"},
+    {"name": "Ana Lopez", "email": "ana@example.com"},
+    {"name": "Pedro Ramirez", "email": "pedro@example.com"},
 ]
 
 SEED_ORDERS: list[dict[str, Any]] = [
     {
-        "customer": "Juan Pérez",
+        "customer": "Juan Perez",
         "status": "completed",
         "items": [
             {"product": "Laptop HP", "price": 25000, "quantity": 1},
@@ -25,30 +25,30 @@ SEED_ORDERS: list[dict[str, Any]] = [
         ],
     },
     {
-        "customer": "Juan Pérez",
+        "customer": "Juan Perez",
         "status": "pending",
         "items": [
             {"product": "Monitor Samsung 27''", "price": 8500, "quantity": 1},
         ],
     },
     {
-        "customer": "María García",
+        "customer": "Maria Garcia",
         "status": "completed",
         "items": [
-            {"product": "Teclado mecánico", "price": 1800, "quantity": 1},
+            {"product": "Teclado mecanico", "price": 1800, "quantity": 1},
             {"product": "Webcam HD", "price": 1200, "quantity": 1},
-            {"product": "Audífonos Sony", "price": 2500, "quantity": 1},
+            {"product": "Audifonos Sony", "price": 2500, "quantity": 1},
         ],
     },
     {
-        "customer": "María García",
+        "customer": "Maria Garcia",
         "status": "cancelled",
         "items": [
             {"product": "iPad Air", "price": 15000, "quantity": 1},
         ],
     },
     {
-        "customer": "Ana López",
+        "customer": "Ana Lopez",
         "status": "pending",
         "items": [
             {"product": "Cable USB-C", "price": 150, "quantity": 5},
@@ -56,7 +56,7 @@ SEED_ORDERS: list[dict[str, Any]] = [
         ],
     },
     {
-        "customer": "Pedro Ramírez",
+        "customer": "Pedro Ramirez",
         "status": "completed",
         "items": [
             {"product": "SSD 1TB", "price": 2200, "quantity": 2},
@@ -78,10 +78,18 @@ def seed_database() -> None:
             logger.info("Base de datos ya tiene datos — seed omitido")
             return
 
-        # Crear usuarios
-        users: dict[str, UserModel] = {}
         for data in SEED_ORDERS:
-            user = users[data["customer"]]
+            customer_name = data["customer"]
+
+            # Buscar o crear usuario
+            user = session.query(UserModel).filter_by(name=customer_name).first()
+            if not user:
+                email = customer_name.lower().replace(" ", ".") + "@example.com"
+                user = UserModel(name=customer_name, email=email)
+                session.add(user)
+                session.flush()
+
+            # Crear orden
             order = OrderModel(
                 user=user,
                 status=data["status"],
@@ -95,22 +103,9 @@ def seed_database() -> None:
                 ],
             )
             session.add(order)
-        # Crear órdenes
-        for data in SEED_ORDERS:
-            user = users[data["customer"]]
-            order = OrderModel(
-                user=user,
-                status=data["status"],
-                items=[OrderItemModel(**item) for item in data["items"]],
-            )
-            session.add(order)
 
         session.commit()
-        logger.info(
-            "Seed completado: %d usuarios, %d órdenes",
-            len(SEED_USERS),
-            len(SEED_ORDERS),
-        )
+        logger.info("Seed completado: %d órdenes creadas", len(SEED_ORDERS))
 
     except Exception:
         session.rollback()
