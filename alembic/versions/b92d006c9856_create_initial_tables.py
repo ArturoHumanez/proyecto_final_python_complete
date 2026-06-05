@@ -1,7 +1,7 @@
 """create initial tables
 
 Revision ID: b92d006c9856
-Revises: 
+Revises:
 Create Date: 2026-06-04 13:52:55.614149
 
 """
